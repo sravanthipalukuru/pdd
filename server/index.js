@@ -74,6 +74,7 @@ async function sendOtpEmail(email, otpCode) {
     console.log(`\x1b[32m[OTP] Email sent to ${email}\x1b[0m`);
   } catch (err) {
     console.error('[OTP] Email send failed:', err.message);
+    throw new Error(`Email failed: ${err.message}`);
   }
 }
 
@@ -100,7 +101,8 @@ app.post('/api/auth/register', async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: true });
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
-    sendOtpEmail(email, otpCode); // async, don't await
+    
+    await sendOtpEmail(email, otpCode);
 
     res.json({ success: true, message: 'Account created! Check your email for OTP.' });
   } catch (err) {
@@ -122,7 +124,8 @@ app.post('/api/auth/login', async (req, res) => {
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: false });
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
-    sendOtpEmail(email, otpCode); // async, don't await
+    
+    await sendOtpEmail(email, otpCode);
 
     res.json({ success: true, message: 'Password correct! Check your email for OTP.' });
   } catch (err) {
