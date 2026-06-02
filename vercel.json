@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/:match*",
-      "destination": "https://dental-backend-l6bc.onrender.com/api/:match*"
+      "destination": "https://pdd-8u6r.onrender.com/api/:match*"
     },
     {
       "source": "/(.*)",
