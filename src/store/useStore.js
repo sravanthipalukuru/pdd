@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { API_BASE } from '../config/api.js';
 
 const getUserId = () => {
   return localStorage.getItem('teethAppUserId') || null;
@@ -58,7 +59,7 @@ export const useStore = create((set, get) => ({
     
     set({ isLoading: true });
     try {
-      const res = await fetch(`/api/progress/${currentUserId}`);
+      const res = await fetch(`${API_BASE}/api/progress/${currentUserId}`);
       if (res.ok) {
         const data = await res.json();
         set({
@@ -103,7 +104,7 @@ export const useStore = create((set, get) => ({
     if (!currentUserId) return;
 
     try {
-      await fetch(`/api/progress/${currentUserId}/complete-game`, {
+      await fetch(`${API_BASE}/api/progress/${currentUserId}/complete-game`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ gameId, scoreEarned, anxietyReduction })
@@ -119,7 +120,7 @@ export const useStore = create((set, get) => ({
     if (!currentUserId) return;
 
     try {
-      await fetch(`/api/progress/${currentUserId}/avatar`, {
+      await fetch(`${API_BASE}/api/progress/${currentUserId}/avatar`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ avatar: newAvatar })
@@ -133,7 +134,7 @@ export const useStore = create((set, get) => ({
     const { userId } = get();
     if (!userId) return;
     try {
-      const res = await fetch(`/api/progress/${userId}/profile`, {
+      const res = await fetch(`${API_BASE}/api/progress/${userId}/profile`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profileData)
@@ -157,7 +158,7 @@ export const useStore = create((set, get) => ({
     if (coins < cost) return false;
     
     try {
-      const res = await fetch(`/api/progress/${userId}/buy`, {
+      const res = await fetch(`${API_BASE}/api/progress/${userId}/buy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, cost })
@@ -182,7 +183,7 @@ export const useStore = create((set, get) => ({
     const { userId } = get();
     if (!userId) return;
     try {
-      const res = await fetch(`/api/progress/${userId}/complete-level`, {
+      const res = await fetch(`${API_BASE}/api/progress/${userId}/complete-level`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ gameId })

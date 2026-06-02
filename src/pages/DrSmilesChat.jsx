@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Image as ImageIcon, Smile, Mic, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { API_BASE } from '../config/api.js';
 import './DrSmilesChat.css';
 
 const systemInstruction = "You are Dr. Smiles, an incredibly fun, magical, and super caring dental bear! Your absolute favorite thing in the whole world is taking care of teeth! You speak in an enthusiastic, goofy, and super friendly tone. You frequently recommend playing our awesome HappyDental mini-games (like 'Clinic Explorer', 'Tooth Defender', or 'Sugar Bug Blaster') to help kids learn and feel super brave! Keep your responses very short, punchy, and use lots of fun emojis so they fit easily in a mobile chat bubble.";
@@ -36,7 +37,7 @@ export default function DrSmilesChat() {
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`/api/chat/${userId}`)
+    fetch(`${API_BASE}/api/chat/${userId}`)
       .then(res => res.json())
       .then(data => {
         if (data.messages && data.messages.length > 0) {
@@ -56,7 +57,7 @@ export default function DrSmilesChat() {
   const saveMessage = async (msg) => {
     if (!userId) return;
     try {
-      await fetch(`/api/chat/${userId}`, {
+      await fetch(`${API_BASE}/api/chat/${userId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg })

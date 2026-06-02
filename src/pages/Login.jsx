@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User, Mail, Lock, Smile, Camera } from 'lucide-react';
+import { API_BASE } from '../config/api.js';
 import './Login.css';
 
 export default function Login() {
@@ -53,7 +54,7 @@ export default function Login() {
 
     setLoading(true); setError('');
     try {
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+      const endpoint = isLogin ? `${API_BASE}/api/auth/login` : `${API_BASE}/api/auth/register`;
       const body = isLogin
         ? { email: finalEmail, password: finalPassword }
         : { parentName: finalName, email: finalEmail, password: finalPassword };
