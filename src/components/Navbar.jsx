@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
+import { LogOut } from 'lucide-react';
 import './Navbar.css';
 
 const navLinks = [
@@ -17,6 +18,9 @@ export default function Navbar() {
   const userId = useStore(state => state.userId);
   const avatar = useStore(state => state.avatar);
   const displayName = useStore(state => state.displayName);
+  const login        = useStore(state => state.login);
+  const logout       = useStore(state => state.logout);
+  const navigate     = useNavigate();
   const [scrolled, setScrolled]   = useState(false);
   const [menuOpen, setMenuOpen]   = useState(false);
 
@@ -97,9 +101,9 @@ export default function Navbar() {
               {emoji} {label}
             </Link>
           ))}
-          <Link to="/child" className="btn btn-primary" style={{ marginTop: 12 }}>
-            Start Adventure ✨
-          </Link>
+          <button className="navbar__drawer-logout" onClick={() => { logout(); navigate('/login'); setMenuOpen(false); }}>
+            <LogOut size={16}/> Logout
+          </button>
         </div>
       )}
     </nav>

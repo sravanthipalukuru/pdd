@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, UserPlus, AlertCircle, CheckCircle2, X, User, Star, Gamepad2, TrendingUp, ArrowLeft } from 'lucide-react';
+import { API_BASE } from '../config/api.js';
 import './DentistPortal.css';
 
 export default function DentistPortal() {
@@ -16,14 +17,14 @@ export default function DentistPortal() {
   const [avgRating, setAvgRating] = useState(null);
 
   const fetchPatients = () => {
-    fetch('/api/patients')
+    fetch(`${API_BASE}/api/patients`)
       .then(res => res.json())
       .then(data => { setPatientsList(data); setIsLoading(false); })
       .catch(() => setIsLoading(false));
   };
 
   const fetchReviews = () => {
-    fetch('/api/reviews/Dr. Sarah Smith')
+    fetch(`${API_BASE}/api/reviews/Dr. Sarah Smith`)
       .then(res => res.json())
       .then(data => { setReviews(data.reviews || []); setAvgRating(data.avgRating); })
       .catch(() => {});
@@ -46,7 +47,7 @@ export default function DentistPortal() {
     setInviteStatus('loading');
     setInviteError('');
     try {
-      const res = await fetch('/api/dentist/invite', {
+      const res = await fetch(`${API_BASE}/api/dentist/invite`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: inviteUsername.trim() }),
