@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.happydental.app"
+    namespace = "com.happydental.kidsadventure"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.happydental.app"
+        applicationId "com.happydental.kidsadventure"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

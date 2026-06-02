@@ -1,4 +1,4 @@
-package com.happydental.app;
+package com.happydental.kidsadventure;
 
 import com.getcapacitor.BridgeActivity;
 
