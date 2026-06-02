@@ -94,13 +94,14 @@
 .auth-toggle-btn:hover { text-decoration: underline; }
 
 /* ── OTP boxes ── */
-.otp-row { display: flex; gap: 10px; justify-content: center; margin: 8px 0; }
+.otp-row { display: flex; gap: 8px; justify-content: center; margin: 8px 0; flex-wrap: nowrap; }
 .otp-box {
-  width: 48px; height: 56px; text-align: center;
-  font-size: 22px; font-weight: 700;
-  border: 2px solid #e2e8f0; border-radius: 14px;
+  width: 42px; height: 52px; text-align: center;
+  font-size: 20px; font-weight: 700;
+  border: 2px solid #e2e8f0; border-radius: 12px;
   background: #f8fafc; color: #1e293b; outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
 }
 .otp-box:focus { border-color: #74ebd5; box-shadow: 0 0 0 3px rgba(116,235,213,0.2); background: white; }
 

@@ -14,8 +14,18 @@ export default function ChildPortal() {
   const progressPercent = (xp % 100) / 100 * 100;
 
   // Find 3 recommended games the user hasn't mastered yet (level < 10)
+  // Filter by age if the user has an age set
+  const userAge = parseInt(useStore(state => state.age), 10);
   const incompleteGames = allGames.filter(g => (gameLevels[g.id] || 0) < 10);
-  const recentGames = incompleteGames.length >= 3 ? incompleteGames.slice(0, 3) : allGames.slice(0, 3);
+  
+  let recommendedGames = incompleteGames;
+  if (!isNaN(userAge)) {
+    recommendedGames = incompleteGames.filter(g => userAge >= g.minAge && userAge <= g.maxAge);
+    // If they master everything in their age group, fallback to all unmastered
+    if (recommendedGames.length === 0) recommendedGames = incompleteGames;
+  }
+  
+  const displayGames = recommendedGames.length >= 3 ? recommendedGames.slice(0, 3) : allGames.slice(0, 3);
 
   const handlePlay = (game) => {
     if (routeMap[game.id]) {
@@ -73,11 +83,11 @@ export default function ChildPortal() {
         {/* Continue Playing */}
         <section className="portal-section">
           <div className="section-title-row">
-            <h2 className="section-title">Jump Back In</h2>
+            <h2 className="section-title">Recommended for You</h2>
             <Link to="/games" className="see-all-link">All Games <ChevronRight size={16}/></Link>
           </div>
           <div className="games-grid">
-            {recentGames.map((game, i) => {
+            {displayGames.map((game, i) => {
               const currentLevel = gameLevels[game.id] || 0;
               return (
                 <motion.div key={game.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + (i * 0.1) }}>

@@ -45,7 +45,12 @@ export default function GameCard({ game, locked = false, currentLevel = 0, onPla
         )}
         
         <div className="game-card__footer">
-          <span className="badge badge-teal">{game.category}</span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <span className="badge badge-teal">{game.category}</span>
+            {game.minAge && game.maxAge && (
+              <span className="badge badge-purple" style={{ fontSize: '10px' }}>{game.minAge}-{game.maxAge} Yrs</span>
+            )}
+          </div>
           <button 
             className="btn btn-primary btn-sm game-card__btn" 
             disabled={locked}

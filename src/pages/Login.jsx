@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store/useStore';
 import { User, Mail, Lock, Smile, Camera } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function Login() {
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
   const [otp, setOtp]               = useState(['', '', '', '', '', '']);
-  const [debugOtp, setDebugOtp]     = useState('');
+
   const [childName, setChildName]   = useState('');
   const [childAge, setChildAge]     = useState('');
   const [childBday, setChildBday]   = useState('');
@@ -20,34 +20,52 @@ export default function Login() {
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
 
-  const otpRefs = useRef([]);
-  const login     = useStore(s => s.login);
-  const setAvatar = useStore(s => s.setAvatar);
-  const setProfile = useStore(s => s.setProfile);
-  const navigate  = useNavigate();
+  const otpRefs      = useRef([]);
+  const nameRef      = useRef(null);
+  const emailRef     = useRef(null);
+  const passwordRef  = useRef(null);
+  const login        = useStore(s => s.login);
+  const setAvatar    = useStore(s => s.setAvatar);
+  const setProfile   = useStore(s => s.setProfile);
+  const navigate     = useNavigate();
+
+  // Clear stale errors on mount and sync autofilled values
+  useEffect(() => {
+    setError('');
+    // Poll briefly for autofill (browsers fill after a short delay)
+    const timer = setTimeout(() => {
+      if (nameRef.current?.value && !parentName) setParentName(nameRef.current.value);
+      if (emailRef.current?.value && !email) setEmail(emailRef.current.value);
+      if (passwordRef.current?.value && !password) setPassword(passwordRef.current.value);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   const avatarList = ['😊','🐻','🦁','🦊','🐯','🐰','🐼','🐨','🐸','🐶','🐱','😄'];
 
   /* ─── Step 1: Submit credentials ─── */
   const handleCredentials = async (e) => {
     e.preventDefault();
-    const trimEmail = email.trim();
-    if (!trimEmail.includes('@')) return setError('Please enter a valid Gmail address');
-    if (!isLogin && !parentName.trim()) return setError('Please enter your name');
-    if (password.length < 6) return setError('Password must be at least 6 characters');
+    // Read directly from DOM to catch browser-autofilled values React state may have missed
+    const finalName     = nameRef.current?.value?.trim()     || parentName.trim();
+    const finalEmail    = emailRef.current?.value?.trim()    || email.trim();
+    const finalPassword = passwordRef.current?.value         || password;
+
+    if (!finalEmail.includes('@')) return setError('Please enter a valid Gmail address');
+    if (!isLogin && !finalName) return setError('Please enter your name');
+    if (finalPassword.length < 6) return setError('Password must be at least 6 characters');
 
     setLoading(true); setError('');
     try {
       const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const body = isLogin
-        ? { email: trimEmail, password }
-        : { parentName: parentName.trim(), email: trimEmail, password };
+        ? { email: finalEmail, password: finalPassword }
+        : { parentName: finalName, email: finalEmail, password: finalPassword };
 
       const res  = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) return setError(data.message || 'Something went wrong');
 
-      if (data.debug_otp) setDebugOtp(data.debug_otp);
       setStep(2);
     } catch { setError('Server error. Please try again.'); }
     finally   { setLoading(false); }
@@ -117,22 +135,22 @@ export default function Login() {
               <p className="auth-subtitle">{isLogin ? 'Sign in to continue' : 'Join Dental Buddy today'}</p>
             </div>
 
-            <form onSubmit={handleCredentials} className="auth-form">
+            <form onSubmit={handleCredentials} className="auth-form" autoComplete="on">
               {!isLogin && (
                 <div className="auth-input-group">
                   <User size={20} className="auth-input-icon" />
-                  <input type="text" placeholder="Parent Name" value={parentName} onChange={e => { setParentName(e.target.value); setError(''); }} disabled={loading} />
+                  <input ref={nameRef} type="text" placeholder="Parent Name" autoComplete="name" value={parentName} onChange={e => { setParentName(e.target.value); setError(''); }} disabled={loading} />
                 </div>
               )}
 
               <div className="auth-input-group">
                 <Mail size={20} className="auth-input-icon" />
-                <input type="email" placeholder="Gmail Address" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} disabled={loading} />
+                <input ref={emailRef} type="email" placeholder="Gmail Address" autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} disabled={loading} />
               </div>
 
               <div className="auth-input-group">
                 <Lock size={20} className="auth-input-icon" />
-                <input type="password" placeholder="Password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }} disabled={loading} />
+                <input ref={passwordRef} type="password" placeholder="Password" autoComplete="current-password" value={password} onChange={e => { setPassword(e.target.value); setError(''); }} disabled={loading} />
               </div>
 
               {error && <p className="auth-error-msg">{error}</p>}
@@ -162,11 +180,6 @@ export default function Login() {
               </div>
               <h1 className="auth-title">Enter OTP</h1>
               <p className="auth-subtitle">We sent a 6-digit code to<br /><strong>{email}</strong></p>
-              {debugOtp && (
-                <div className="debug-otp-box">
-                  🔑 Your OTP: <strong>{debugOtp}</strong>
-                </div>
-              )}
             </div>
 
             <form onSubmit={handleVerifyOtp} className="auth-form">

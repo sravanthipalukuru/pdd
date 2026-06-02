@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
@@ -42,29 +43,30 @@ const getDefaultProgress = (userId) => ({
 // In-memory OTP store (simple, fast)
 const otpStore = new Map();
 
+// Nodemailer transporter (Gmail SMTP)
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
+
 async function sendOtpEmail(email, otpCode) {
   try {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      console.log(`\n\x1b[32m[OTP] No RESEND_API_KEY set. OTP for ${email}: ${otpCode}\x1b[0m\n`);
-      return;
-    }
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'Happy Dental <onboarding@resend.dev>',
-        to: [email],
-        subject: 'Your Happy Dental OTP Code',
-        html: `<div style="font-family:sans-serif;text-align:center;max-width:500px;margin:0 auto">
+    await transporter.sendMail({
+      from: `"Happy Dental 🦷" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: 'Your Happy Dental OTP Code',
+      html: `
+        <div style="font-family:sans-serif;text-align:center;max-width:500px;margin:0 auto;padding:30px">
           <h2 style="color:#0d9488">🦷 Happy Dental</h2>
-          <p>Your login code:</p>
-          <div style="font-size:36px;font-weight:bold;letter-spacing:10px;color:#0f766e;background:#f0fdfa;padding:20px;border-radius:12px;margin:20px 0">${otpCode}</div>
-          <p style="color:#9ca3af;font-size:13px">Expires in 5 minutes. Do not share.</p>
+          <p style="font-size:16px;color:#374151">Your one-time login code is:</p>
+          <div style="font-size:40px;font-weight:bold;letter-spacing:12px;color:#0f766e;background:#f0fdfa;padding:24px;border-radius:12px;margin:24px 0;border:2px dashed #99f6e4">${otpCode}</div>
+          <p style="color:#9ca3af;font-size:13px">This code expires in <strong>5 minutes</strong>. Do not share it with anyone.</p>
         </div>`
-      })
     });
-    console.log(`[OTP] Sent to ${email}`);
+    console.log(`\x1b[32m[OTP] Email sent to ${email}\x1b[0m`);
   } catch (err) {
     console.error('[OTP] Email send failed:', err.message);
   }
@@ -95,7 +97,7 @@ app.post('/api/auth/register', async (req, res) => {
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
     sendOtpEmail(email, otpCode); // async, don't await
 
-    res.json({ success: true, message: 'Account created! Check your email for OTP.', debug_otp: otpCode });
+    res.json({ success: true, message: 'Account created! Check your email for OTP.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -117,7 +119,7 @@ app.post('/api/auth/login', async (req, res) => {
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
     sendOtpEmail(email, otpCode); // async, don't await
 
-    res.json({ success: true, message: 'Password correct! Check your email for OTP.', debug_otp: otpCode });
+    res.json({ success: true, message: 'Password correct! Check your email for OTP.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

@@ -251,6 +251,7 @@ button {
 
 /* ─── Shared Game UI ─── */
 .btn-lg { padding: 18px 36px; font-size: 18px; }
+.btn-sm { padding: 7px 16px; font-size: 13px; }
 
 .game-header {
   position: fixed;
