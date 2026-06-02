@@ -48,7 +48,7 @@ export default function ChildPortal() {
           >
             <div className="avatar-circle">{avatar || '🐻'}</div>
             <div className="status-info">
-              <h2>Welcome back, {displayName || userId || 'Friend'}!</h2>
+              <h2>Welcome back, {displayName && displayName !== userId ? displayName : (userId ? userId.split('@')[0] : 'Friend')}! 👋</h2>
               <div className="status-badges">
                 <span className="badge badge-yellow"><Star size={14}/> Level {level}</span>
                 <span className="badge badge-teal">🪙 {coins} Coins</span>

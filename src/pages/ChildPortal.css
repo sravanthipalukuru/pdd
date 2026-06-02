@@ -1,97 +1,120 @@
 .child-portal {
-  padding-top: calc(var(--nav-height) + 40px);
+  padding-top: calc(var(--nav-height) + 24px);
+  padding-bottom: 32px;
 }
 
+/* ── Header ── */
 .portal-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .avatar-status {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 16px 32px 16px 16px;
-  border-radius: var(--radius-full);
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .avatar-circle {
-  width: 64px; height: 64px;
+  width: 56px; height: 56px;
+  flex-shrink: 0;
   background: var(--grad-yellow);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 28px;
   box-shadow: var(--shadow-sm);
 }
 
+.status-info {
+  flex: 1;
+  min-width: 0; /* allows text-overflow to work */
+}
+
 .status-info h2 {
-  font-size: 24px;
+  font-size: 17px;
   margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .status-badges {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .dr-smiles-btn {
-  font-size: 18px;
-  padding: 16px 32px;
+  font-size: 16px;
+  padding: 14px 24px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
 }
 
-/* Daily Mission */
+/* ── Daily Mission ── */
 .daily-mission {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  text-align: center;
   background: var(--grad-hero);
   color: white;
-  margin-bottom: 48px;
-  padding: 40px;
+  margin-bottom: 32px;
+  padding: 28px 20px;
+  gap: 20px;
+  border-radius: var(--radius-lg);
 }
 
 .mission-content {
-  max-width: 500px;
+  width: 100%;
 }
 
 .mission-content h3 {
-  font-size: 32px;
-  margin: 16px 0 12px;
+  font-size: 22px;
+  margin: 12px 0 10px;
   color: white;
   text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .mission-content p {
-  font-size: 18px;
-  margin-bottom: 24px;
+  font-size: 15px;
+  margin-bottom: 20px;
   opacity: 0.9;
 }
 
 .mission-graphic {
-  font-size: 80px;
-  letter-spacing: -10px;
+  font-size: 52px;
+  letter-spacing: -6px;
   background: rgba(255,255,255,0.2);
-  padding: 30px;
+  padding: 20px 24px;
   border-radius: var(--radius-full);
   backdrop-filter: blur(8px);
 }
 
-/* Sections */
+/* ── Sections ── */
 .portal-section {
-  margin-bottom: 48px;
+  margin-bottom: 32px;
 }
 
 .section-title-row {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 18px;
 }
 
 .see-all-link {
@@ -99,23 +122,24 @@
   align-items: center;
   color: var(--teal);
   font-weight: 700;
+  font-size: 14px;
 }
 
 .see-all-link:hover { color: var(--teal-dark); text-decoration: underline; }
 
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 16px;
 }
 
-/* Progress */
+/* ── Progress ── */
 .smile-progress {
-  padding: 40px;
+  padding: 24px 20px;
 }
 
 .progress-bar-container {
-  height: 24px;
+  height: 20px;
   background: var(--gray-100);
   border-radius: var(--radius-full);
   overflow: hidden;
@@ -129,11 +153,23 @@
   transition: width 1s ease-in-out;
 }
 
-.mt-3 { margin-top: 16px; }
+.mt-3 { margin-top: 12px; }
 
-@media (max-width: 900px) {
-  .portal-header { flex-direction: column; align-items: stretch; }
-  .avatar-status { padding: 20px; border-radius: var(--radius-lg); flex-direction: column; text-align: center; }
-  .daily-mission { flex-direction: column; text-align: center; gap: 32px; padding: 32px 20px; }
-  .games-grid { grid-template-columns: 1fr; }
+/* ── Tablet and above ── */
+@media (min-width: 600px) {
+  .games-grid { grid-template-columns: repeat(2, 1fr); }
+  .portal-header { flex-direction: row; align-items: center; }
+  .avatar-status { flex: 1; }
+  .dr-smiles-btn { width: auto; }
+  .status-info h2 { font-size: 20px; }
+}
+
+@media (min-width: 900px) {
+  .games-grid { grid-template-columns: repeat(3, 1fr); }
+  .daily-mission { flex-direction: row; text-align: left; justify-content: space-between; padding: 40px; }
+  .mission-content h3 { font-size: 30px; }
+  .mission-content p { font-size: 17px; }
+  .mission-graphic { font-size: 80px; letter-spacing: -10px; padding: 30px; }
+  .status-info h2 { font-size: 24px; }
+  .dr-smiles-btn { font-size: 18px; padding: 16px 32px; }
 }
