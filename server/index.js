@@ -15,6 +15,11 @@ app.use(express.json());
 
 const PORT = 54321;
 
+// Root Route (so you don't see Cannot GET /)
+app.get('/', (req, res) => {
+  res.send('🦷 Dr. Smiles Backend API is running successfully!');
+});
+
 // MongoDB Connection
 const MONGO_URI = "mongodb://kaveens555_db_user:dental@ac-zep0sdb-shard-00-00.prqmrhr.mongodb.net:27017,ac-zep0sdb-shard-00-01.prqmrhr.mongodb.net:27017,ac-zep0sdb-shard-00-02.prqmrhr.mongodb.net:27017/?ssl=true&replicaSet=atlas-kkm6qm-shard-0&authSource=admin&appName=Cluster0";
 
