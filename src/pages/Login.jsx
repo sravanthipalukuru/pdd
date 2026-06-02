@@ -6,11 +6,10 @@ import './Login.css';
 
 export default function Login() {
   const [isLogin, setIsLogin]       = useState(false);
-  const [step, setStep]             = useState(1); // 1=credentials, 2=otp, 3=child profile
+  const [step, setStep]             = useState(1); // 1=credentials, 2=child profile (new users)
   const [parentName, setParentName] = useState('');
   const [email, setEmail]           = useState('');
   const [password, setPassword]     = useState('');
-  const [otp, setOtp]               = useState(['', '', '', '', '', '']);
 
   const [childName, setChildName]   = useState('');
   const [childAge, setChildAge]     = useState('');
@@ -20,7 +19,6 @@ export default function Login() {
   const [error, setError]           = useState('');
   const [loading, setLoading]       = useState(false);
 
-  const otpRefs      = useRef([]);
   const nameRef      = useRef(null);
   const emailRef     = useRef(null);
   const passwordRef  = useRef(null);
@@ -32,7 +30,6 @@ export default function Login() {
   // Clear stale errors on mount and sync autofilled values
   useEffect(() => {
     setError('');
-    // Poll briefly for autofill (browsers fill after a short delay)
     const timer = setTimeout(() => {
       if (nameRef.current?.value && !parentName) setParentName(nameRef.current.value);
       if (emailRef.current?.value && !email) setEmail(emailRef.current.value);
@@ -46,12 +43,11 @@ export default function Login() {
   /* ─── Step 1: Submit credentials ─── */
   const handleCredentials = async (e) => {
     e.preventDefault();
-    // Read directly from DOM to catch browser-autofilled values React state may have missed
-    const finalName     = nameRef.current?.value?.trim()     || parentName.trim();
-    const finalEmail    = emailRef.current?.value?.trim()    || email.trim();
-    const finalPassword = passwordRef.current?.value         || password;
+    const finalName     = nameRef.current?.value?.trim()  || parentName.trim();
+    const finalEmail    = emailRef.current?.value?.trim() || email.trim();
+    const finalPassword = passwordRef.current?.value      || password;
 
-    if (!finalEmail.includes('@')) return setError('Please enter a valid Gmail address');
+    if (!finalEmail.includes('@')) return setError('Please enter a valid email address');
     if (!isLogin && !finalName) return setError('Please enter your name');
     if (finalPassword.length < 6) return setError('Password must be at least 6 characters');
 
@@ -66,38 +62,12 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) return setError(data.message || 'Something went wrong');
 
-      setStep(2);
-    } catch { setError('Server error. Please try again.'); }
-    finally   { setLoading(false); }
-  };
-
-  /* ─── Step 2: Verify OTP ─── */
-  const handleOtpChange = (i, val) => {
-    if (isNaN(val)) return;
-    const next = [...otp]; next[i] = val.slice(-1); setOtp(next); setError('');
-    if (val && i < 5) otpRefs.current[i + 1]?.focus();
-  };
-  const handleOtpKey = (i, e) => {
-    if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
-  };
-
-  const handleVerifyOtp = async (e) => {
-    e.preventDefault();
-    const code = otp.join('');
-    if (code.length !== 6) return setError('Please enter the 6-digit OTP');
-
-    setLoading(true); setError('');
-    try {
-      const res  = await fetch('/api/auth/verify-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email.trim(), otp: code }) });
-      const data = await res.json();
-      if (!res.ok) return setError(data.message || 'Invalid OTP');
-
-      // Log in the user
+      // Directly log in — no OTP needed
       login(data.userId);
 
       if (data.isNewUser) {
         // New signup → go to child profile step
-        setStep(3);
+        setStep(2);
       } else {
         navigate('/');
       }
@@ -105,7 +75,7 @@ export default function Login() {
     finally   { setLoading(false); }
   };
 
-  /* ─── Step 3: Child Profile ─── */
+  /* ─── Step 2: Child Profile (new users only) ─── */
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
@@ -145,7 +115,7 @@ export default function Login() {
 
               <div className="auth-input-group">
                 <Mail size={20} className="auth-input-icon" />
-                <input ref={emailRef} type="email" placeholder="Gmail Address" autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} disabled={loading} />
+                <input ref={emailRef} type="email" placeholder="Email Address" autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} disabled={loading} />
               </div>
 
               <div className="auth-input-group">
@@ -156,7 +126,7 @@ export default function Login() {
               {error && <p className="auth-error-msg">{error}</p>}
 
               <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? 'Please wait...' : (isLogin ? 'Send OTP' : 'Sign Up & Send OTP')}
+                {loading ? 'Please wait...' : (isLogin ? 'Login' : 'Sign Up')}
               </button>
             </form>
 
@@ -171,51 +141,8 @@ export default function Login() {
           </>
         )}
 
-        {/* ── STEP 2: OTP Verification ── */}
+        {/* ── STEP 2: Child Profile (new users only) ── */}
         {step === 2 && (
-          <>
-            <div className="auth-header">
-              <div className="auth-icon-wrapper" style={{ background: 'linear-gradient(135deg,#74ebd5,#acb6e5)' }}>
-                <span style={{ fontSize: 36 }}>📩</span>
-              </div>
-              <h1 className="auth-title">Enter OTP</h1>
-              <p className="auth-subtitle">We sent a 6-digit code to<br /><strong>{email}</strong></p>
-            </div>
-
-            <form onSubmit={handleVerifyOtp} className="auth-form">
-              <div className="otp-row">
-                {otp.map((digit, i) => (
-                  <input
-                    key={i}
-                    ref={el => otpRefs.current[i] = el}
-                    className="otp-box"
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={1}
-                    value={digit}
-                    onChange={e => handleOtpChange(i, e.target.value)}
-                    onKeyDown={e => handleOtpKey(i, e)}
-                    autoFocus={i === 0}
-                    disabled={loading}
-                  />
-                ))}
-              </div>
-
-              {error && <p className="auth-error-msg">{error}</p>}
-
-              <button type="submit" className="auth-submit-btn" disabled={loading}>
-                {loading ? 'Verifying...' : 'Verify OTP'}
-              </button>
-
-              <button type="button" className="auth-back-btn" onClick={() => { setStep(1); setOtp(['','','','','','']); setError(''); }} disabled={loading}>
-                ← Back
-              </button>
-            </form>
-          </>
-        )}
-
-        {/* ── STEP 3: Child Profile (new users only) ── */}
-        {step === 3 && (
           <>
             <div className="auth-header">
               <h1 className="auth-title">Child Profile</h1>

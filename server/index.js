@@ -7,7 +7,7 @@ import Chat from './models/Chat.js';
 import User from './models/User.js';
 import Review from './models/Review.js';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
+
 
 const app = express();
 app.use(cors());
@@ -45,38 +45,7 @@ const getDefaultProgress = (userId) => ({
   gameLevels: {}
 });
 
-// In-memory OTP store (simple, fast)
-const otpStore = new Map();
 
-// Nodemailer transporter (Gmail SMTP)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
-
-async function sendOtpEmail(email, otpCode) {
-  try {
-    await transporter.sendMail({
-      from: `"Happy Dental 🦷" <${process.env.GMAIL_USER}>`,
-      to: email,
-      subject: 'Your Happy Dental OTP Code',
-      html: `
-        <div style="font-family:sans-serif;text-align:center;max-width:500px;margin:0 auto;padding:30px">
-          <h2 style="color:#0d9488">🦷 Happy Dental</h2>
-          <p style="font-size:16px;color:#374151">Your one-time login code is:</p>
-          <div style="font-size:40px;font-weight:bold;letter-spacing:12px;color:#0f766e;background:#f0fdfa;padding:24px;border-radius:12px;margin:24px 0;border:2px dashed #99f6e4">${otpCode}</div>
-          <p style="color:#9ca3af;font-size:13px">This code expires in <strong>5 minutes</strong>. Do not share it with anyone.</p>
-        </div>`
-    });
-    console.log(`\x1b[32m[OTP] Email sent to ${email}\x1b[0m`);
-  } catch (err) {
-    console.error('[OTP] Email send failed:', err.message);
-    throw new Error(`Email failed: ${err.message}`);
-  }
-}
 
 // POST /api/auth/register
 app.post('/api/auth/register', async (req, res) => {
@@ -97,14 +66,7 @@ app.post('/api/auth/register', async (req, res) => {
     const defaultProgress = new Progress(getDefaultProgress(email));
     await defaultProgress.save();
 
-    // Generate & store OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: true });
-    console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
-    
-    sendOtpEmail(email, otpCode); // async, don't await because Render free tier blocks SMTP
-
-    res.json({ success: true, message: 'Account created! Check your email for OTP.' });
+    res.json({ success: true, userId: email, isNewUser: true, parentName, message: 'Account created! Welcome to Happy Dental.' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -120,34 +82,7 @@ app.post('/api/auth/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Wrong password. Please try again.' });
 
-    // Generate & store OTP
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: false });
-    console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
-    
-    sendOtpEmail(email, otpCode); // async, don't await because Render free tier blocks SMTP
-
-    res.json({ success: true, message: 'Password correct! Check your email for OTP.' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// POST /api/auth/verify-otp
-app.post('/api/auth/verify-otp', async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-    const record = otpStore.get(email);
-    if (!record) return res.status(401).json({ message: 'OTP expired or not found. Please try again.' });
-    if (Date.now() > record.expires) {
-      otpStore.delete(email);
-      return res.status(401).json({ message: 'OTP has expired. Please login again.' });
-    }
-    if (record.otp !== otp) return res.status(401).json({ message: 'Wrong OTP. Please check your email.' });
-
-    otpStore.delete(email);
-    const user = await User.findOne({ email });
-    res.json({ success: true, userId: email, isNewUser: record.isNewUser, parentName: user?.parentName });
+    res.json({ success: true, userId: email, isNewUser: false, parentName: user.parentName });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
