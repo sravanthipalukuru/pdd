@@ -4,9 +4,8 @@ import { useStore } from '../store/useStore';
 import './Navbar.css';
 
 const navLinks = [
-  { path: '/',          label: 'Home',    emoji: '🏠' },
+  { path: '/',          label: 'Dashboard', emoji: '🏠' },
   { path: '/games',     label: 'Games',   emoji: '🎮' },
-  { path: '/child',     label: 'Child',   emoji: '👦' },
   { path: '/store',     label: 'Epic Store', emoji: '🛍️' },
   { path: '/parent',    label: 'Parent',  emoji: '👨‍👩‍👧' },
   { path: '/dentist',   label: 'Dentist', emoji: '🦷' },

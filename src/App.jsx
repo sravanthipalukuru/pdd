@@ -54,7 +54,7 @@ export default function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/"             element={<Landing />} />
+        <Route path="/"             element={userId ? <ChildPortal /> : <Landing />} />
         <Route path="/child"        element={<ProtectedRoute><ChildPortal /></ProtectedRoute>} />
         <Route path="/parent"       element={<ProtectedRoute><ParentPortal /></ProtectedRoute>} />
         <Route path="/dentist"      element={<ProtectedRoute><DentistPortal /></ProtectedRoute>} />
