@@ -102,7 +102,7 @@ app.post('/api/auth/register', async (req, res) => {
     otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: true });
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
     
-    await sendOtpEmail(email, otpCode);
+    sendOtpEmail(email, otpCode); // async, don't await because Render free tier blocks SMTP
 
     res.json({ success: true, message: 'Account created! Check your email for OTP.' });
   } catch (err) {
@@ -125,7 +125,7 @@ app.post('/api/auth/login', async (req, res) => {
     otpStore.set(email, { otp: otpCode, expires: Date.now() + 5 * 60 * 1000, isNewUser: false });
     console.log(`\x1b[32m[OTP] ${email} => ${otpCode}\x1b[0m`);
     
-    await sendOtpEmail(email, otpCode);
+    sendOtpEmail(email, otpCode); // async, don't await because Render free tier blocks SMTP
 
     res.json({ success: true, message: 'Password correct! Check your email for OTP.' });
   } catch (err) {
